@@ -31,10 +31,8 @@ python synthetic_generator.py \
   --missing-col-rate 0.02 \
   --extra-col-rate 0.02 \
   --wrong-type-rate 0.02 \
-  --mixed-type-rate 0.02 \
   --reorder-col-rate 0.02 \
   --empty-table-rate 0.005 \
-  --duplicate-col-rate 0.01 \
   --metacat-batch metacat_batch_stress.json
 
 ```

@@ -36,3 +36,17 @@ python synthetic_generator.py \
   --metacat-batch metacat_batch_stress.json
 
 ```
+
+3. Mu2E-style batch:
+
+```
+python synthetic_generator.py \
+  -o mu2e_synth \
+  -n 20000 \
+  -s simple \
+  --namespace mu2e \
+  --dataset-type raw \
+  --tag synthetic \
+  --tag stress-test \
+  --metacat-batch mu2e_batch.json
+```

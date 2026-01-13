@@ -226,7 +226,11 @@ def corrupt_dataframe(df: pd.DataFrame, cfg: SchemaCorruptionConfig) -> pd.DataF
     if cfg.mixed_type_rate > 0 and len(df.columns) > 0 and len(df) > 0 and random.random() < cfg.mixed_type_rate:
         col = random.choice(df.columns.tolist())
         row_idx = random.randint(0, len(df) - 1)
-        df.at[row_idx, col] = {"weird": "object"}
+        #df.at[row_idx, col] = str({"weird": "object"})
+        try:
+            df.at[row_idx, col] = {"weird": "object"}
+        except Exception as e:
+            print(f"[SKIP] Mixed-type injection failed for column '{col}': {e}")
 
     # Reorder columns
     if cfg.reorder_col_rate > 0 and len(df.columns) > 1 and random.random() < cfg.reorder_col_rate:
@@ -355,42 +359,31 @@ def generate_datasets(
 # Metacat batch file generation
 # ----------------------------------------------------------------------
 
- def build_metacat_batch(
+def build_metacat_batch(
     datasets: List[Tuple[Path, Dict[str, Any], str]],
-    namespace: str,
-    dataset_type: str,
-    tags: List[str],
 ) -> Dict[str, Any]:
     """
-    Build a Fermilab-style metacat batch registration structure.
+    Build a generic metacat batch registration structure.
 
     Each entry includes:
-    - namespace
-    - dataset (logical name)
-    - file (absolute path)
-    - size (bytes)
-    - metadata
-    - parents (empty for synthetic)
-    - tags
-    - type (dataset type)
+    - logical_name: path (possibly duplicated) used as dataset name
+    - file_path: absolute path
+    - size_bytes: file size
+    - metadata: JSON metadata dict
     """
     entries = []
     for parquet_path, metadata, logical_name in datasets:
         stat = parquet_path.stat()
         entry = {
-            "namespace": namespace,
-            "dataset": logical_name,
-            "file": str(parquet_path.resolve()),
-            "size": stat.st_size,
+            "logical_name": logical_name,
+            "file_path": str(parquet_path.resolve()),
+            "size_bytes": stat.st_size,
             "metadata": metadata,
-            "parents": [],
-            "tags": tags,
-            "type": dataset_type,
         }
         entries.append(entry)
 
-    return {"datasets": entries}
-
+    batch = {"datasets": entries}
+    return batch
 
 
 def write_metacat_batch(batch: Dict[str, Any], output_path: Path) -> None:
@@ -525,24 +518,6 @@ def parse_args() -> argparse.Namespace:
         help="Probability of creating duplicate column names in the Parquet table.",
     )
 
-    parser.add_argument(
-        "--namespace", 
-        type=str, 
-        default="synthetic",
-        help="Metacat namespace for registration.")
-    
-    parser.add_argument(
-        "--dataset-type", 
-        type=str, 
-        default="raw",
-        help="Dataset type (raw, reco, calib, etc.).")
-    
-    parser.add_argument(
-        "--tag", 
-        action="append", 
-        default=[],
-        help="Tag(s) to attach to each dataset.")
-
     return parser.parse_args()
 
 
@@ -603,12 +578,7 @@ def main() -> None:
 
     if args.metacat_batch:
         print(f"Building metacat batch file: {args.metacat_batch}")
-        batch = build_metacat_batch(
-            datasets,
-            namespace=args.namespace,
-            dataset_type=args.dataset_type,
-            tags=args.tag,
-        )
+        batch = build_metacat_batch(datasets)
         write_metacat_batch(batch, args.metacat_batch)
 
     print("Done.")

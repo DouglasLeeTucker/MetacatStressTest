@@ -222,16 +222,17 @@ def corrupt_dataframe(df: pd.DataFrame, cfg: SchemaCorruptionConfig) -> pd.DataF
         col = random.choice(df.columns.tolist())
         df[col] = df[col].astype(str)
 
-    # Mixed types: put a dict into a random row of a random column
+    # Mixed types: insert a string into a numeric column after converting it to object dtype
     if cfg.mixed_type_rate > 0 and len(df.columns) > 0 and len(df) > 0 and random.random() < cfg.mixed_type_rate:
-        col = random.choice(df.columns.tolist())
-        row_idx = random.randint(0, len(df) - 1)
-        #df.at[row_idx, col] = str({"weird": "object"})
-        try:
-            df.at[row_idx, col] = {"weird": "object"}
-        except Exception as e:
-            print(f"[SKIP] Mixed-type injection failed for column '{col}': {e}")
-
+        print("[SKIP] Mixed-type injection corruption not yet implemented")
+    #    col = random.choice(df.columns.tolist())
+    #    row_idx = random.randint(0, len(df) - 1)
+    #    try:
+    #        df[col] = df[col].astype(object)  # Force column to object dtype
+    #        df.at[row_idx, col] = "corrupt_value"
+    #    except Exception as e:
+    #        print(f"[SKIP] Mixed-type injection failed for column '{col}': {e}")
+        
     # Reorder columns
     if cfg.reorder_col_rate > 0 and len(df.columns) > 1 and random.random() < cfg.reorder_col_rate:
         cols = df.columns.tolist()
@@ -240,9 +241,10 @@ def corrupt_dataframe(df: pd.DataFrame, cfg: SchemaCorruptionConfig) -> pd.DataF
 
     # Duplicate column names
     if cfg.duplicate_col_rate > 0 and len(df.columns) > 0 and random.random() < cfg.duplicate_col_rate:
-        dup_col = random.choice(df.columns.tolist())
-        df[dup_col + "_dup"] = df[dup_col]
-        df.rename(columns={dup_col + "_dup": dup_col}, inplace=True)
+        print("[SKIP] Duplicate column names corruption not yet implemented")
+    #    dup_col = random.choice(df.columns.tolist())
+    #    df[dup_col + "_dup"] = df[dup_col]
+    #    df.rename(columns={dup_col + "_dup": dup_col}, inplace=True)
 
     return df
 
@@ -313,9 +315,16 @@ def generate_dataset(
         duplicate_pool.append(logical_name)
 
     # Write Parquet file
-    table = pa.Table.from_pandas(df)
-    pq.write_table(table, parquet_path)
+    #table = pa.Table.from_pandas(df)
+    #pq.write_table(table, parquet_path)
+    try:
+        table = pa.Table.from_pandas(df, preserve_index=False)
+        pq.write_table(table, parquet_path)
+    except Exception as e:
+        print(f"[SKIP] Failed to write Parquet for {parquet_path.name}: {e}")
+        return None, None, None
 
+    
     # JSON metadata sidecar
     json_path = parquet_path.with_suffix(".json")
     with open(json_path, "w") as f:

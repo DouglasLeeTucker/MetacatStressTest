@@ -1,6 +1,8 @@
 # MetacatStressTest
 Python code for creating a dataset for a stress test of Metacat, etc.
 
+This package was developed using Microsoft Copilot.
+
 Example runs for synthetic_generator.py:
 
 1. Basic:

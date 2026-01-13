@@ -355,31 +355,42 @@ def generate_datasets(
 # Metacat batch file generation
 # ----------------------------------------------------------------------
 
-def build_metacat_batch(
+ def build_metacat_batch(
     datasets: List[Tuple[Path, Dict[str, Any], str]],
+    namespace: str,
+    dataset_type: str,
+    tags: List[str],
 ) -> Dict[str, Any]:
     """
-    Build a generic metacat batch registration structure.
+    Build a Fermilab-style metacat batch registration structure.
 
     Each entry includes:
-    - logical_name: path (possibly duplicated) used as dataset name
-    - file_path: absolute path
-    - size_bytes: file size
-    - metadata: JSON metadata dict
+    - namespace
+    - dataset (logical name)
+    - file (absolute path)
+    - size (bytes)
+    - metadata
+    - parents (empty for synthetic)
+    - tags
+    - type (dataset type)
     """
     entries = []
     for parquet_path, metadata, logical_name in datasets:
         stat = parquet_path.stat()
         entry = {
-            "logical_name": logical_name,
-            "file_path": str(parquet_path.resolve()),
-            "size_bytes": stat.st_size,
+            "namespace": namespace,
+            "dataset": logical_name,
+            "file": str(parquet_path.resolve()),
+            "size": stat.st_size,
             "metadata": metadata,
+            "parents": [],
+            "tags": tags,
+            "type": dataset_type,
         }
         entries.append(entry)
 
-    batch = {"datasets": entries}
-    return batch
+    return {"datasets": entries}
+
 
 
 def write_metacat_batch(batch: Dict[str, Any], output_path: Path) -> None:
@@ -514,6 +525,24 @@ def parse_args() -> argparse.Namespace:
         help="Probability of creating duplicate column names in the Parquet table.",
     )
 
+    parser.add_argument(
+        "--namespace", 
+        type=str, 
+        default="synthetic",
+        help="Metacat namespace for registration.")
+    
+    parser.add_argument(
+        "--dataset-type", 
+        type=str, 
+        default="raw",
+        help="Dataset type (raw, reco, calib, etc.).")
+    
+    parser.add_argument(
+        "--tag", 
+        action="append", 
+        default=[],
+        help="Tag(s) to attach to each dataset.")
+
     return parser.parse_args()
 
 
@@ -574,7 +603,12 @@ def main() -> None:
 
     if args.metacat_batch:
         print(f"Building metacat batch file: {args.metacat_batch}")
-        batch = build_metacat_batch(datasets)
+        batch = build_metacat_batch(
+            datasets,
+            namespace=args.namespace,
+            dataset_type=args.dataset_type,
+            tags=args.tag,
+        )
         write_metacat_batch(batch, args.metacat_batch)
 
     print("Done.")

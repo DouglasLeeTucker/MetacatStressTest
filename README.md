@@ -132,7 +132,7 @@ conda activate metacat-stress
         -n 200 \
         --min-rows 50 \
         --max-rows 200 \
-        --metacat-batch ./synthetic_minimal/batch_synthetic_minimal.json \
+        --metacat-batch \
         --namespace dtucker_metacat_tests_2 \
         --owner dtucker \
         --dataset-prefix test_20260129 \

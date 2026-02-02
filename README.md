@@ -124,6 +124,21 @@ conda activate metacat-stress
     --metacat-batch ./synthetic_minimal/hypotpro_batch.json
 ```
 
+5.  Same as #4, but explictly providing additinal metacat namespace/dataset info:
+
+```
+./synthetic_generator_minimal.py \
+        -o ./synthetic_minimal \
+        -n 200 \
+        --min-rows 50 \
+        --max-rows 200 \
+        --metacat-batch ./synthetic_minimal/batch_synthetic_minimal.json \
+        --namespace dtucker_metacat_tests_2 \
+        --owner dtucker \
+        --dataset-prefix test_20260129 \
+        --num-datasets 5
+```
+
 
 ***Example runs for synthetic_generator.py (still does not conform to standard schemas):***
 

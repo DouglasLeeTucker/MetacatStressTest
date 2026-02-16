@@ -27,18 +27,20 @@ name: metacat-stress
 channels:
   - conda-forge
 dependencies:
-  # Core Python
-  - python=3.11
+  # Match Spack's Python major/minor version
+  - python=3.9
 
-  # Data formats
+  # Core scientific stack (Python 3.9 compatible)
+  - numpy
+  - pandas
   - pyarrow
   - fastparquet
-  - pandas
-  - numpy
+  - scipy
 
   # JSON/YAML metadata handling
   - pyyaml
   - orjson
+  - jsonschema
 
   # CLI + tooling
   - click
@@ -50,7 +52,7 @@ dependencies:
   - hypothesis
   - python-rapidjson
 
-  # File generation + corruption knobs
+  # File generation + compression
   - pillow
   - zstandard
 
@@ -59,18 +61,17 @@ dependencies:
   - aiofiles
   - anyio
 
-  # Optional: FITS support if you want astronomy‑style payloads
+  # Optional: astronomy formats
   - astropy
 
-  # Optional: HDF5/ROOT payloads for DUNE/Mu2E realism
+  # Optional: HDF5/ROOT payloads
   - h5py
   - uproot
 
-  # Testing + validation
+  # Testing
   - pytest
-  - jsonschema
 
-  # Install mamba for faster package ops
+  # Faster package operations
   - mamba
 ```
 

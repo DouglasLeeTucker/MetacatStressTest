@@ -1,0 +1,13 @@
+./metacat_stress_pipeline.sh \
+    --namespace dtucker_metacat_stress_tests \
+    --dataset metacat_stress_test_20260212 \
+    --workdir ~/WORK/GitHub/MetacatStressTest/python \
+    --synthetic-dir synthetic_minimal_n100000 \
+    --child-name metacat_stress_test_20260212_child_of_100000_parents \
+    --num-parents 100000 \
+    --verbose \
+    --logfile ~/WORK/GitHub/MetacatStressTest/python/metacat_stress_test_20260212.log \
+    --run-generate \
+    --run-declare-synthetic \
+    --run-create-child \
+    --run-declare-child
